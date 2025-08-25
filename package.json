@@ -9,8 +9,15 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "chart.js": "^4.5.0",
+    "ethers": "^6.15.0",
+    "framer-motion": "^12.23.12",
+    "gsap": "^3.13.0",
+    "lucide-react": "^0.541.0",
+    "ogl": "^1.0.11",
     "react": "^18.3",
     "react-dom": "^18.3",
+    "react-router-dom": "^7.8.2",
     "thirdweb": "^5"
   },
   "devDependencies": {

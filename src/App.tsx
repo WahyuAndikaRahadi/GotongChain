@@ -1,98 +1,164 @@
-import { ConnectButton } from "thirdweb/react";
-import thirdwebIcon from "./thirdweb.svg";
-import { client } from "./client";
+import React from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+// Ubah ConnectButton di sini untuk menggunakan custom label
+import { ConnectButton } from "thirdweb/react"; 
+import { client } from "./api/thirdweb";
+import { sepolia } from "thirdweb/chains";
+
+import Navbar from "./components/Navbar";
+import Aurora from "./components/ui/Aurora";
+import { Home } from "./pages/Home";
+import { About } from "./pages/About";
+import { CampaignsPage } from "./pages/CampaignPage";
+import { CreateCampaign } from "./pages/CreateCampaign";
+import { CampaignDetails } from "./pages/CampaignDetail";
+import { Wallet } from "lucide-react"; // Import ikon Wallet
+
+const pageVariants = {
+  initial: { opacity: 0, x: -100 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: 100 },
+};
 
 export function App() {
-	return (
-		<main className="p-4 pb-10 min-h-[100vh] flex items-center justify-center container max-w-screen-lg mx-auto">
-			<div className="py-20">
-				<Header />
+  const location = useLocation();
 
-				<div className="flex justify-center mb-20">
-					<ConnectButton
-						client={client}
-						appMetadata={{
-							name: "Example app",
-							url: "https://example.com",
-						}}
-					/>
-				</div>
+  const navItems = [
+    { label: "Beranda", href: "/" },
+    { label: "Tentang Kami", href: "/about" },
+    { label: "Kampanye", href: "/campaigns" },
+    { label: "Buat Kampanye", href: "/create" },
+  ];
 
-				<ThirdwebResources />
-			</div>
-		</main>
-	);
-}
+  // 1. Buat elemen ikon dompet
+  const walletIcon = <Wallet className="w-5 h-5 mr-2 inline-block" />;
 
-function Header() {
-	return (
-		<header className="flex flex-col items-center mb-20 md:mb-20">
-			<img
-				src={thirdwebIcon}
-				alt=""
-				className="size-[150px] md:size-[150px]"
-				style={{
-					filter: "drop-shadow(0px 0px 24px #a726a9a8)",
-				}}
-			/>
+  // 2. Komponen tombol ConnectButton yang akan digunakan di beberapa tempat
+  const connectButton = (
+    <ConnectButton
+      client={client}
+      chain={sepolia}
+      connectButton={{
+        // **REVISI DI SINI:** Sisipkan ikon di dalam label
+        label: (
+          <span className="flex items-center justify-center">
+            {walletIcon}
+            Hubungkan Dompet
+          </span>
+        ),
+        className: "px-4 py-2 w-full text-center bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-bold shadow-md transition-transform duration-200 hover:scale-105",
+      }}
+    />
+  );
 
-			<h1 className="text-2xl md:text-6xl font-bold tracking-tighter mb-6 text-zinc-100">
-				thirdweb SDK
-				<span className="text-zinc-300 inline-block mx-1"> + </span>
-				<span className="inline-block -skew-x-6 text-violet-500"> vite </span>
-			</h1>
+  return (
+    <div className="relative text-white min-h-screen font-sans flex flex-col items-center p-4 sm:p-8">
+      {/* Aurora component as the background */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <Aurora
+          colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
+          blend={0.5}
+          amplitude={1.0}
+          speed={0.5}
+        />
+      </div>
 
-			<p className="text-zinc-300 text-base">
-				Read the{" "}
-				<code className="bg-zinc-800 text-zinc-300 px-2 rounded py-1 text-sm mx-1">
-					README.md
-				</code>{" "}
-				file to get started.
-			</p>
-		</header>
-	);
-}
+      {/* Kontainer untuk Navbar dan tombol koneksi di desktop */}
+      <div className="w-full max-w-7xl flex justify-between items-center relative z-50">
+        {/* Menggunakan Navbar dan meneruskan tombol ConnectButton sebagai prop */}
+        <Navbar
+          logo="./src/GotongChain.png"
+          items={navItems}
+          activeHref={location.pathname}
+          connectButton={connectButton} // Teruskan tombol ke komponen Navbar
+        />
 
-function ThirdwebResources() {
-	return (
-		<div className="grid gap-4 lg:grid-cols-3 justify-center">
-			<ArticleCard
-				title="thirdweb SDK Docs"
-				href="https://portal.thirdweb.com/typescript/v5"
-				description="thirdweb TypeScript SDK documentation"
-			/>
-
-			<ArticleCard
-				title="Components and Hooks"
-				href="https://portal.thirdweb.com/typescript/v5/react"
-				description="Learn about the thirdweb React components and hooks in thirdweb SDK"
-			/>
-
-			<ArticleCard
-				title="thirdweb Dashboard"
-				href="https://thirdweb.com/dashboard"
-				description="Deploy, configure, and manage your smart contracts from the dashboard."
-			/>
-		</div>
-	);
-}
-
-function ArticleCard(props: {
-	title: string;
-	href: string;
-	description: string;
-}) {
-	return (
-		<a
-			href={`${props.href}?utm_source=vite-template`}
-			target="_blank"
-			className="flex flex-col border border-zinc-800 p-4 rounded-lg hover:bg-zinc-900 transition-colors hover:border-zinc-700"
-			rel="noreferrer"
-		>
-			<article>
-				<h2 className="text-lg font-semibold mb-2">{props.title}</h2>
-				<p className="text-sm text-zinc-400">{props.description}</p>
-			</article>
-		</a>
-	);
+        {/* Tombol koneksi untuk tampilan desktop.
+            Hidden on mobile (md:hidden), visible on medium and larger screens. */}
+        <div className="hidden md:flex ml-auto">
+          {connectButton}
+        </div>
+      </div>
+      
+      {/* Konten halaman */}
+      <div className="w-full max-w-7xl mt-8 relative">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route
+              path="/"
+              element={
+                <motion.div
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={pageVariants}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Home />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                <motion.div
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={pageVariants}
+                  transition={{ duration: 0.3 }}
+                >
+                  <About />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/campaigns"
+              element={
+                <motion.div
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={pageVariants}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CampaignsPage />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/create"
+              element={
+                <motion.div
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={pageVariants}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CreateCampaign />
+                </motion.div>
+              }
+            />
+            <Route
+              path="/campaigns/:id"
+              element={
+                <motion.div
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={pageVariants}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CampaignDetails />
+                </motion.div>
+              }
+            />
+            <Route path="*" element={<p className="text-center text-red-400 text-lg">Halaman tidak ditemukan.</p>} />
+          </Routes>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
 }
